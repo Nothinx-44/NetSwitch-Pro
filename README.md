@@ -4,7 +4,6 @@
 
 Changez instantanément de configuration IP (adresse statique, masque, passerelle, DNS) en un clic. Idéal pour les techniciens IT, développeurs et utilisateurs multi-réseaux.
 
-![Thème matrix sombre](https://img.shields.io/badge/theme-matrix%20dark-00FF41?style=flat)
 ![PowerShell 5.1](https://img.shields.io/badge/PowerShell-5.1%2B-blue?style=flat)
 ![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D4?style=flat)
 
