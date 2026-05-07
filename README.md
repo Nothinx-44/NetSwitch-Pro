@@ -65,4 +65,4 @@ Les profils sont stockés dans `%APPDATA%\IPSwitch\` :
 
 ## Auteur
 
-**Nothinx-44** — [github.com/Nothinx-44/IPSwitch](https://github.com/Nothinx-44/IPSwitch)
+**Nothinx-44** — https://github.com/Nothinx-44/NetSwitch-Pro
