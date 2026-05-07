@@ -1,2 +1,69 @@
-# NetSwitch-Pro
-NetSwitch Pro – Gestionnaire de profils réseau pour Windows. Changez instantanément de configuration IP (adresse statique, masque, passerelle, DNS) en un clic. Idéal pour les techniciens IT, développeurs et utilisateurs multi-réseaux. Groupes de profils, rollback automatique, thème sombre, icône system tray.
+# NetSwitch Pro
+
+**Gestionnaire de profils réseau IP pour Windows**
+
+Changez instantanément de configuration IP (adresse statique, masque, passerelle, DNS) en un clic. Idéal pour les techniciens IT, développeurs et utilisateurs multi-réseaux.
+
+![Thème matrix sombre](https://img.shields.io/badge/theme-matrix%20dark-00FF41?style=flat)
+![PowerShell 5.1](https://img.shields.io/badge/PowerShell-5.1%2B-blue?style=flat)
+![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D4?style=flat)
+
+---
+
+## Fonctionnalités
+
+- **Profils réseau** — Créez et gérez autant de profils IP statiques que nécessaire (IP, masque, passerelle, DNS primaire/secondaire)
+- **Groupes de clients** — Organisez vos profils en groupes, renommez-les, supprimez-les
+- **Application en 1 clic** — Double-clic sur un profil pour l'appliquer immédiatement
+- **Bouton DHCP rapide** — Repassez en DHCP sur n'importe quelle carte réseau en un clic depuis la sidebar
+- **Rollback automatique** — La config précédente est sauvegardée avant chaque apply, un bouton `↩ Rollback` apparaît dans la barre de statut pour restaurer en cas de problème
+- **Icône system tray** — Tourne en arrière-plan, appliquez un profil sans ouvrir l'app
+- **Historique** — Conserve les 20 derniers profils appliqués
+- **Import / Export** — Partagez vos profils via JSON
+- **Mise à jour automatique** — Vérifie les nouvelles versions sur GitHub au démarrage
+- **Thème matrix sombre** — Interface vert/noir Consolas
+
+---
+
+## Installation
+
+1. Téléchargez `IPSwitch.ps1` et `IPSwitch.bat`
+2. Double-cliquez sur **`IPSwitch.bat`** pour lancer l'application (élévation admin nécessaire)
+
+> Les droits administrateur sont requis pour modifier les configurations réseau.
+
+---
+
+## Utilisation
+
+| Action | Comment |
+|--------|---------|
+| Créer un profil | Clic sur **+ Nouveau client**, remplir les champs, **Enregistrer** |
+| Appliquer un profil | Double-clic sur le client dans la liste, ou sélectionner + **Appliquer maintenant** |
+| Importer la config actuelle | Sélectionner la carte réseau, clic sur **Importer config actuelle** |
+| Passer en DHCP | Sélectionner la carte dans le dropdown sidebar, clic sur **→ DHCP** |
+| Rollback | Clic sur **↩ Rollback** dans la barre de statut après un apply |
+| Groupes | Clic sur **+ Groupe**, glisser les clients entre groupes via le champ Groupe du formulaire |
+
+---
+
+## Données
+
+Les profils sont stockés dans `%APPDATA%\IPSwitch\` :
+- `clients.json` — profils réseau
+- `groups.json` — groupes
+- `history.json` — historique des 20 derniers applies
+
+---
+
+## Prérequis
+
+- Windows 10 / 11
+- PowerShell 5.1+
+- Droits administrateur
+
+---
+
+## Auteur
+
+**Nothinx-44** — [github.com/Nothinx-44/IPSwitch](https://github.com/Nothinx-44/IPSwitch)
