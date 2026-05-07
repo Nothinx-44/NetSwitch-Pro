@@ -27,8 +27,8 @@ Changez instantanément de configuration IP (adresse statique, masque, passerell
 
 ## Installation
 
-1. Téléchargez `IPSwitch.ps1` et `IPSwitch.bat`
-2. Double-cliquez sur **`IPSwitch.bat`** pour lancer l'application (élévation admin nécessaire)
+1. Téléchargez `NetSwitchPro.ps1` et `Démarrer NetSwitchPro.bat`
+3. Double-cliquez sur **`IPSwitch.bat`** pour lancer l'application (élévation admin nécessaire)
 
 > Les droits administrateur sont requis pour modifier les configurations réseau.
 
