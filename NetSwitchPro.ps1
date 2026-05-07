@@ -3,7 +3,7 @@
 .SYNOPSIS
     NetSwitch Pro v1.2.0 - Gestionnaire de profils reseau IP
 .AUTHOR
-    Nothinx-44  |  https://github.com/Nothinx-44/IPSwitch
+    Nothinx-44  |  https://github.com/Nothinx-44/NetSwitch-Pro
 .CHANGELOG
  
 #>
@@ -11,11 +11,13 @@
 # ==============================================================
 #  AUTO-ELEVATION UAC
 # ==============================================================
+# Auto-elevation geree par le manifest PS2EXE (-RequireAdmin)
+# Verification de securite uniquement (ne devrait jamais etre faux)
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
          ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process -FilePath 'PowerShell.exe' `
-        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
-        -Verb RunAs
+    [System.Windows.Forms.MessageBox]::Show(
+        "NetSwitch Pro necessite des droits administrateur.`nRelancez en tant qu'administrateur.",
+        'NetSwitch Pro', 'OK', 'Warning') | Out-Null
     exit
 }
 
@@ -24,7 +26,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # -- Filet de securite global : capture toute erreur de demarrage ---------
-$Script:ErrorLog = Join-Path $env:APPDATA 'IPSwitch\startup_error.log'
+$Script:ErrorLog = Join-Path $env:APPDATA 'NetSwitchPro\startup_error.log'
 trap {
     $msg = "ERREUR DEMARRAGE NetSwitch Pro v$(if($Script:Ver){$Script:Ver}else{'?'})`n" +
            "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`n" +
@@ -50,8 +52,8 @@ trap {
 # ==============================================================
 $Script:Ver           = '1.2.0'
 $Script:GHOwner       = 'Nothinx-44'
-$Script:GHRepo        = 'IPSwitch'
-$Script:DataDir       = Join-Path $env:APPDATA 'IPSwitch'
+$Script:GHRepo        = 'NetSwitch-Pro'
+$Script:DataDir       = Join-Path $env:APPDATA 'NetSwitchPro'
 $Script:DataFile      = Join-Path $Script:DataDir 'clients.json'
 $Script:HistoryFile   = Join-Path $Script:DataDir 'history.json'
 $Script:CurrentID     = $null
@@ -78,6 +80,11 @@ $Script:CollapsedGroups  = [System.Collections.Generic.HashSet[string]]::new()
 $Script:SelectedClientID = $null
 $Script:LastConfig       = $null   # sauvegarde avant apply pour rollback
 
+# Migration des donnees depuis l'ancien dossier (premiere execution apres renommage)
+$Script:OldDataDir = Join-Path $env:APPDATA 'IPSwitch'
+if ((Test-Path $Script:OldDataDir) -and -not (Test-Path $Script:DataDir)) {
+    try { Copy-Item -Path $Script:OldDataDir -Destination $Script:DataDir -Recurse -Force } catch { }
+}
 if (-not (Test-Path $Script:DataDir)) {
     New-Item -ItemType Directory -Path $Script:DataDir -Force | Out-Null
 }
@@ -426,7 +433,7 @@ function Start-UpdateCheck {
         try {
             $rel = Invoke-RestMethod `
                 -Uri "https://api.github.com/repos/$o/$r/releases/latest" `
-                -Headers @{ 'User-Agent' = "IPSwitch/$v" } `
+                -Headers @{ 'User-Agent' = "NetSwitchPro/$v" } `
                 -UseBasicParsing -TimeoutSec 8
             $lv = $rel.tag_name -replace '^v', ''
             if ([version]$lv -gt [version]$v) {
@@ -476,7 +483,7 @@ function Install-Update {
     $Script:UpdateLabel.IsEnabled = $false
     Set-Status 'Telechargement en cours...' '#0078D4'
 
-    $dlDest = "$env:TEMP\IPSwitch_update.zip"
+    $dlDest = "$env:TEMP\NetSwitchPro_update.zip"
     $Script:DlRS = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
     $Script:DlRS.Open()
     $Script:DlRS.SessionStateProxy.SetVariable('url',  $Script:UpdateZipUrl)
@@ -503,20 +510,25 @@ function Install-Update {
         }
         if (-not $dlOk) { $Script:UpdateLabel.IsEnabled = $true; return }
         try {
-            $tmpDir  = "$env:TEMP\IPSwitch_update"
+            $tmpDir  = "$env:TEMP\NetSwitchPro_update"
             if (Test-Path $tmpDir) { Remove-Item $tmpDir -Recurse -Force }
             Expand-Archive $dlDest $tmpDir -Force
-            $here   = Split-Path $PSCommandPath -Parent
+            # MyCommand.Path = chemin exe compile ou ps1 selon le contexte
+            $selfPath = $MyInvocation.MyCommand.Path
+            $here     = Split-Path $selfPath -Parent
+            $isExe    = $selfPath -match '\.exe$'
+            $restart  = if ($isExe) { "`"$selfPath`"" } `
+                        else { "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$selfPath`"" }
             $oemEnc = [System.Text.Encoding]::GetEncoding(
                 [System.Globalization.CultureInfo]::CurrentCulture.TextInfo.OEMCodePage)
             $bat = "@echo off`r`n" +
                    "timeout /t 2 /nobreak >nul`r`n" +
                    "robocopy `"$tmpDir`" `"$here`" /E /IS /IT /IM /COPYALL >nul`r`n" +
-                   "start `"`" powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$here\IPSwitch.ps1`"`r`n" +
+                   "start `"`" $restart`r`n" +
                    "rd /s /q `"$tmpDir`" >nul 2>&1`r`n" +
                    "del `"%~f0`""
-            [System.IO.File]::WriteAllText("$env:TEMP\IPSwitch_upd.bat", $bat, $oemEnc)
-            Start-Process cmd.exe -ArgumentList "/c `"$env:TEMP\IPSwitch_upd.bat`"" -WindowStyle Hidden
+            [System.IO.File]::WriteAllText("$env:TEMP\NetSwitchPro_upd.bat", $bat, $oemEnc)
+            Start-Process cmd.exe -ArgumentList "/c `"$env:TEMP\NetSwitchPro_upd.bat`"" -WindowStyle Hidden
             $Script:ReallyClosing = $true
             [System.Windows.Application]::Current.Shutdown()
         } catch {
